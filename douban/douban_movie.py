@@ -16,13 +16,12 @@ __author__ = 'gloria'
 
 
 class DoubanMovie:
-
     def __init__(self):
         self.base_url = "https://movie.douban.com/j/search_subjects?type=movie&tag=%E7%83%AD%E9%97%A8&sort=recommend" \
                         "&page_limit=20&page_start=([page_start])"
         self.headers = {
-            'User-Agent': "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) " \
-                          "Chrome/54.0.2840.98 Safari/537.36 "
+            'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) '
+                          'Chrome/54.0.2840.98 Safari/537.36 '
         }
         self.redis_conn = redis.RedisUtil()
 
@@ -66,7 +65,6 @@ class DoubanMovie:
         body = self.fetch_body(movie.url)
         body_dom = BeautifulSoup(body, 'html.parser')
         content = body_dom.find(id='content')
-        # print(content)
         movie.name = content.find('span', attrs={'property': 'v:itemreviewed'}).text
 
         try:
@@ -208,5 +206,3 @@ class Movie:
 if __name__ == '__main__':
     spider = DoubanMovie()
     spider.run()
-
-

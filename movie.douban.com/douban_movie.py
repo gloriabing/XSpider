@@ -9,6 +9,8 @@ import json
 import base_utils.redis_util as redis
 from base_utils.common_util import Utils
 
+from base_utils.log_util import LoggerHelper
+
 __author__ = 'gloria'
 
 
@@ -23,7 +25,10 @@ class DoubanMovie:
             'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_1) AppleWebKit/537.36 (KHTML, like Gecko) '
                           'Chrome/54.0.2840.98 Safari/537.36 '
         }
+        self._name = 'douban movie'
         self.redis_conn = redis.RedisUtil()
+        self._logger = LoggerHelper(self._name, '../logs/douban_movie_info.log', True).get_logger()
+        self._console = LoggerHelper('console', '', False).get_logger()
 
     def fetch_body(self, url):
         body = http.HttpUtil.get_response_body_by_get(url, "utf-8", self.headers)
@@ -70,69 +75,69 @@ class DoubanMovie:
         try:
             year = content.find('span', attrs={'class': 'year'}).text
         except:
-            print('detail info parse error, url is ' + movie.url)
+            self._logger.error('detail info parse error, url is %s ' % movie.url)
         try:
             movie.year = re.compile('([\d]+)').search(year).group(1)
         except:
-            print('year parse error, url is ' + movie.url)
+            self._logger.error('year parse error, url is %s ' % movie.url)
 
         info = content.find(id='info')
 
         try:
             movie.directors = re.compile('导演: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('directors parse error, url is ' + movie.url)
+            self._logger.error('directors parse error, url is %s ' % movie.url)
 
         try:
             movie.writes = re.compile('编剧: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('writes parse error, url is ' + movie.url)
+            self._logger.error('writes parse error, url is %s ' % movie.url)
 
         try:
             movie.main_actors = re.compile('主演: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('main_actors parse error, url is ' + movie.url)
+            self._logger.error('main_actors parse error, url is %s ' % movie.url)
 
         try:
             movie.genres = re.compile('类型: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('genres parse error, url is ' + movie.url)
+            self._logger.error('genres parse error, url is %s ' % movie.url)
 
         try:
             movie.language = re.compile('语言: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('language parse error, url is ' + movie.url)
+            self._logger.error('language parse error, url is %s ' % movie.url)
 
         try:
             movie.pub_date = re.compile('上映日期: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('pub_date parse error, url is ' + movie.url)
+            self._logger.error('pub_date parse error, url is %s ' % movie.url)
 
         try:
             movie.alias = re.compile('又名: ([\s\S]*?)\n').search(info.text).group(1).split("/")
         except:
-            print('alias parse error, url is ' + movie.url)
+            self._logger.error('alias parse error, url is %s ' % movie.url)
 
         try:
             movie.official_site = re.compile('官方网站: ([\s\S]*?)\n').search(info.text).group(1)
         except:
-            print('official_site parse error, url is ' + movie.url)
+            self._logger.error('official_site parse error, url is %s ' % movie.url)
 
         try:
             movie.region = re.compile('制片国家/地区: ([\s\S]*?)\n').search(info.text).group(1)
         except:
-            print('region parse error, url is ' + movie.url)
+            self._logger.error('region parse error, url is %s ' % movie.url)
 
         try:
             movie.run_time = re.compile('片长: ([\s\S]*?)\n').search(info.text).group(1)
         except:
-            print('run_time parse error, url is ' + movie.url)
+            self._logger.error('run_time parse error, url is %s ' % movie.url)
 
         try:
             IMDb = re.compile('IMDb链接: ([\s\S]*?)\n').search(info.text).group(1)
             movie.IMDb = 'http://www.imdb.com/title/' + IMDb
         except:
-            print('IMDb parse error, url is ' + movie.url)
+            self._logger.error('IMDb parse error, url is %s ' % movie.url)
 
         return movie
 
@@ -146,8 +151,7 @@ class DoubanMovie:
                 r = self.redis_conn.set_if_absent(url)
                 if r:  # 新资源
                     movie = self.parse_content(movie)
-                    print(movie)
-                    print("---------------------------------------------------------------------")
+                    self._logger.info(Utils.convert_to_dict(movie))
                 else:  # 已存在
                     continue
                 time.sleep(1)

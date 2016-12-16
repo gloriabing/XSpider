@@ -84,37 +84,37 @@ class DoubanMovie:
         info = content.find(id='info')
 
         try:
-            movie.directors = re.compile('导演: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.directors = [x.strip() for x in re.compile('导演: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('directors parse error, url is %s ' % movie.url)
 
         try:
-            movie.writes = re.compile('编剧: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.writes = [x.strip() for x in re.compile('编剧: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('writes parse error, url is %s ' % movie.url)
 
         try:
-            movie.main_actors = re.compile('主演: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.main_actors = [x.strip() for x in re.compile('主演: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('main_actors parse error, url is %s ' % movie.url)
 
         try:
-            movie.genres = re.compile('类型: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.genres = [x.strip() for x in re.compile('类型: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('genres parse error, url is %s ' % movie.url)
 
         try:
-            movie.language = re.compile('语言: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.language = [x.strip() for x in re.compile('语言: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('language parse error, url is %s ' % movie.url)
 
         try:
-            movie.pub_date = re.compile('上映日期: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.pub_date = [x.strip() for x in re.compile('上映日期: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('pub_date parse error, url is %s ' % movie.url)
 
         try:
-            movie.alias = re.compile('又名: ([\s\S]*?)\n').search(info.text).group(1).split("/")
+            movie.alias = [x.strip() for x in re.compile('又名: ([\s\S]*?)\n').search(info.text).group(1).split("/")]
         except:
             self._logger.error('alias parse error, url is %s ' % movie.url)
 
@@ -151,7 +151,8 @@ class DoubanMovie:
                 r = self.redis_conn.set_if_absent(url)
                 if r:  # 新资源
                     movie = self.parse_content(movie)
-                    self._logger.info(Utils.convert_to_dict(movie))
+                    # self._logger.info(Utils.convert_to_dict(movie))
+                    self._console.info(Utils.convert_to_dict(movie))
                 else:  # 已存在
                     continue
                 time.sleep(1)
